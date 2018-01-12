@@ -7,6 +7,7 @@ import android.animation.ObjectAnimator
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.VectorDrawable
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -30,7 +31,7 @@ import android.widget.LinearLayout
 import com.devs.musicalharmonization.Note
 import com.devs.musicalharmonization.NoteBitmap
 import com.devs.musicalharmonization.R
-import com.devs.musicalharmonization.midi.unused.Octave
+import com.devs.musicalharmonization.singletons.Octave
 import com.devs.musicalharmonization.singletons.DensityMetrics
 import com.devs.musicalharmonization.singletons.LastRhythm
 import com.devs.musicalharmonization.singletons.MusicStore
@@ -73,7 +74,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }*/
 
         Thread(Runnable {
-            val quarterNoteHead = ContextCompat.getDrawable(con, R.drawable.quarter_note_head) as VectorDrawable
+            val quarterNoteHead = ContextCompat.getDrawable(con, R.drawable.quarter_note_head) as Drawable
             NoteBitmap.qnh = NoteBitmap.getBitmap(quarterNoteHead)
             //VectorDrawable halfNoteHead = (VectorDrawable) ContextCompat.getDrawable(con, R.drawable.half_note_head);
             //NoteBitmap.hnh = NoteBitmap.getBitmap(halfNoteHead);
@@ -81,7 +82,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Thread(Runnable {
             //VectorDrawable quarterNoteHead = (VectorDrawable) ContextCompat.getDrawable(con, R.drawable.quarter_note_head);
             //NoteBitmap.qnh = NoteBitmap.getBitmap(quarterNoteHead);
-            val halfNoteHead = ContextCompat.getDrawable(con, R.drawable.half_note_head) as VectorDrawable
+            val halfNoteHead = ContextCompat.getDrawable(con, R.drawable.half_note_head) as Drawable
             NoteBitmap.hnh = NoteBitmap.getBitmap(halfNoteHead)
         }).start()
         //DP.r = resources
@@ -274,7 +275,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         object : Thread() {
             override fun run() {
                 MusicStore.sheet.add(MusicStore.activeNotes)
-                System.gc()
+             //   System.gc()
                 for (note in MusicStore.activeNotes) {
                     val mediaPlayer = MediaPlayer()
                     try {

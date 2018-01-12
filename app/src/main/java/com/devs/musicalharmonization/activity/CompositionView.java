@@ -10,6 +10,7 @@ import android.graphics.drawable.VectorDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.devs.musicalharmonization.R;
 import com.devs.musicalharmonization.singletons.DensityMetrics;
 import com.devs.musicalharmonization.singletons.MusicStore;
 import com.devs.musicalharmonization.Note;

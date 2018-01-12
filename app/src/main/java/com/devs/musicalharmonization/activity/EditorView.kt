@@ -3,6 +3,7 @@ package com.devs.musicalharmonization.activity
 import android.annotation.TargetApi
 import android.content.Context
 import android.graphics.*
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.VectorDrawable
 import android.media.MediaPlayer
 import android.net.Uri
@@ -163,7 +164,7 @@ class EditorView : View {
         return result
     }
 
-    @TargetApi(21)
+ //   @TargetApi(21)
     private fun drawNoteHead(note: Note, canvas: Canvas) {
         val mediaPlayer = MediaPlayer()
 
@@ -205,11 +206,11 @@ class EditorView : View {
             LastRhythm.dot = false
         }
         if ((accidental == 1 && note.name != Note.NoteName.b && note.name != Note.NoteName.e) || note.accidental == 1) {
-            val vd = ContextCompat.getDrawable(context, R.drawable.sharp) as VectorDrawable
+            val vd = ContextCompat.getDrawable(context, R.drawable.sharp) as Drawable
             val b = NoteBitmap.getBitmap(vd)
             canvas.drawBitmap(Bitmap.createScaledBitmap(b, (NOTE_HEIGHT * 3 / 2).toInt(), NOTE_HEIGHT.toInt() * 3, true), note.x - NOTE_WIDTH * 2, note.y - NOTE_HEIGHT * 3 / 2, paint)
         }else if (accidental == -1 && note.name != Note.NoteName.f && note.name != Note.NoteName.c){
-            val vd = ContextCompat.getDrawable(context, R.drawable.flat) as VectorDrawable
+            val vd = ContextCompat.getDrawable(context, R.drawable.flat) as Drawable
             val b = NoteBitmap.getBitmap(vd)
             canvas.drawBitmap(Bitmap.createScaledBitmap(b, (NOTE_HEIGHT * 1.35).toInt(), NOTE_HEIGHT.toInt() * 3, true), note.x - NOTE_WIDTH * 2, note.y - NOTE_HEIGHT * 3 / 2, paint)
         }

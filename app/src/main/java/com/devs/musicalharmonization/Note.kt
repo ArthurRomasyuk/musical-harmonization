@@ -1,7 +1,7 @@
 package com.devs.musicalharmonization
 
 import com.devs.musicalharmonization.midi.unused.Clef
-import com.devs.musicalharmonization.midi.unused.Octave
+import com.devs.musicalharmonization.singletons.Octave
 import com.devs.musicalharmonization.singletons.ClefSetting
 import com.devs.musicalharmonization.singletons.DensityMetrics
 import com.devs.musicalharmonization.singletons.Key

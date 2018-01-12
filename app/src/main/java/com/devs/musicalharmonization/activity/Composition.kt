@@ -104,7 +104,7 @@ class Composition : AppCompatActivity(), NavigationView.OnNavigationItemSelected
             for (note in chord) {
                 tempTick = (tick + 480 * lastR).toLong()
 
-                noteTrack.insertNote(0, nameToNum(note), 100, tempTick + chordMargin, 120 * note.rhythm.toLong())
+                 noteTrack.insertNote(0, nameToNum(note), 100, tempTick + chordMargin, 120 * note.rhythm.toLong())
                 print("Kill me")
                 chordMargin += 1
                 lastR = note.rhythm
@@ -132,7 +132,7 @@ class Composition : AppCompatActivity(), NavigationView.OnNavigationItemSelected
 
         }
 
-        System.gc()
+       // System.gc()
         val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.setOnClickListener {
             val mp = MediaPlayer()
