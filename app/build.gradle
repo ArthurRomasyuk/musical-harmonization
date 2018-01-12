@@ -6,7 +6,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.di.devs.musicalharmonization"
+        applicationId "com.devs.musicalharmonization"
         minSdkVersion 14
         targetSdkVersion 23
         versionCode 6
