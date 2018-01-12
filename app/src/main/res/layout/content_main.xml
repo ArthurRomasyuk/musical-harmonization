@@ -85,13 +85,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/sixteenth_note"
-            android:src="@drawable/music_note_sixteenth" />
+            app:srcCompat="@drawable/music_note_sixteenth" />
 
         <com.github.clans.fab.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/eighth_note"
-            android:src="@drawable/music_note_eighth"
+            app:srcCompat="@drawable/music_note_eighth"
 
             />
 
@@ -99,19 +99,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/quarter_note"
-            android:src="@drawable/music_note_quarter" />
+            app:srcCompat="@drawable/music_note_quarter" />
 
         <com.github.clans.fab.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/half_note"
-            android:src="@drawable/music_note_half" />
+            app:srcCompat="@drawable/music_note_half" />
 
         <com.github.clans.fab.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/whole_note"
-            android:src="@drawable/music_note_whole" />
+            app:srcCompat="@drawable/music_note_whole" />
 
     </com.github.clans.fab.FloatingActionMenu>
     </RelativeLayout>
