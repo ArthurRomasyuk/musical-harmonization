@@ -1,9 +1,15 @@
 package com.devs.musicalharmonization
 
+import com.devs.musicalharmonization.midi.unused.Clef
+import com.devs.musicalharmonization.midi.unused.Octave
+import com.devs.musicalharmonization.singletons.ClefSetting
+import com.devs.musicalharmonization.singletons.DensityMetrics
+import com.devs.musicalharmonization.singletons.Key
+import com.devs.musicalharmonization.singletons.LastRhythm
 import java.util.*
 
 /**
- * Created by Patrick on 2/3/2016.
+ * Visual representation of note
  */
 class Note(var x: Float, yC: Float, acc: Int) {
     var y: Float = 0.toFloat()

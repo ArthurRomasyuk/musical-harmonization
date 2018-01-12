@@ -7,7 +7,7 @@ import android.graphics.drawable.VectorDrawable;
 import android.os.Build;
 
 /**
- * Created by Patrick on 3/28/2016.
+ *  3/28/2016.
  */
 public class NoteBitmap {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
