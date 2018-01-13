@@ -57,7 +57,7 @@ public class MidiFile
         mType = mTrackCount > 1 ? 1 : 0;
     }
 
-    public MidiFile(File fileIn) throws FileNotFoundException, IOException
+    public MidiFile(File fileIn) throws IOException
     {
         this(new FileInputStream(fileIn));
     }
@@ -170,7 +170,7 @@ public class MidiFile
         mType = mTrackCount > 1 ? 1 : 0;
     }
 
-    public void writeToFile(File outFile) throws FileNotFoundException, IOException
+    public void writeToFile(File outFile) throws IOException
     {
         FileOutputStream fout = new FileOutputStream(outFile);
 

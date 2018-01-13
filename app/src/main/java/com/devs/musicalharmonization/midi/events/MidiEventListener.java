@@ -19,9 +19,9 @@ package com.devs.musicalharmonization.midi.events;
 
 public interface MidiEventListener
 {
-    public void onStart(boolean fromBeginning);
+    void onStart(boolean fromBeginning);
 
-    public void onEvent(MidiEvent event, long ms);
+    void onEvent(MidiEvent event, long ms);
 
-    public void onStop(boolean finished);
+    void onStop(boolean finished);
 }

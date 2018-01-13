@@ -21,11 +21,11 @@ class KeyChanger : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         super.onCreate(savedInstanceState)
         val sendBack = Intent(this, MainActivity::class.java)
         setContentView(R.layout.activity_key_changer)
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
 
-        val C = findViewById(R.id.key_c) as Button
+        val C = findViewById<Button>(R.id.key_c)
         C.setOnClickListener {
             Key.COUNT = 0
             Key.SHARP = true
@@ -33,76 +33,76 @@ class KeyChanger : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         }
 
         //FLATS
-        val F = findViewById(R.id.key_f) as Button
+        val F = findViewById<Button>(R.id.key_f)
         F.setOnClickListener {
             Key.COUNT = 1
             Key.SHARP = false
             startActivity(sendBack)
         }
 
-        val Bf = findViewById(R.id.key_bf) as Button
+        val Bf = findViewById<Button>(R.id.key_bf)
         Bf.setOnClickListener {
             Key.COUNT = 2
             Key.SHARP = false
             startActivity(sendBack)
         }
-        val Ef = findViewById(R.id.key_ef) as Button
+        val Ef = findViewById<Button>(R.id.key_ef)
         Ef.setOnClickListener {
             Key.COUNT = 3
             Key.SHARP = false
             startActivity(sendBack)
         }
-        val Af = findViewById(R.id.key_af) as Button
+        val Af = findViewById<Button>(R.id.key_af)
         Af.setOnClickListener {
             Key.COUNT = 4
             Key.SHARP = false
             startActivity(sendBack)
         }
-        val Df = findViewById(R.id.key_df) as Button
+        val Df = findViewById<Button>(R.id.key_df)
         Df.setOnClickListener {
             Key.COUNT = 5
             Key.SHARP = false
             startActivity(sendBack)
         }
-        val Gf = findViewById(R.id.key_gf) as Button
+        val Gf = findViewById<Button>(R.id.key_gf)
         Gf.setOnClickListener {
             Key.COUNT = 6
             Key.SHARP = false
             startActivity(sendBack)
         }
         //SHARPS
-        val G = findViewById(R.id.key_g) as Button
+        val G = findViewById<Button>(R.id.key_g)
         G.setOnClickListener {
             Key.COUNT = 1
             Key.SHARP = true
             startActivity(sendBack)
         }
 
-        val D = findViewById(R.id.key_d) as Button
+        val D = findViewById<Button>(R.id.key_d)
         D.setOnClickListener {
             Key.COUNT = 2
             Key.SHARP = true
             startActivity(sendBack)
         }
-        val A = findViewById(R.id.key_a) as Button
+        val A = findViewById<Button>(R.id.key_a)
         A.setOnClickListener {
             Key.COUNT = 3
             Key.SHARP = true
             startActivity(sendBack)
         }
-        val E = findViewById(R.id.key_e) as Button
+        val E = findViewById<Button>(R.id.key_e)
         E.setOnClickListener {
             Key.COUNT = 4
             Key.SHARP = true
             startActivity(sendBack)
         }
-        val B = findViewById(R.id.key_b) as Button
+        val B = findViewById<Button>(R.id.key_b)
         B.setOnClickListener {
             Key.COUNT = 5
             Key.SHARP = true
             startActivity(sendBack)
         }
-        val Fs = findViewById(R.id.key_fs) as Button
+        val Fs = findViewById<Button>(R.id.key_fs)
         Fs.setOnClickListener {
             Key.COUNT = 6
             Key.SHARP = true
@@ -110,20 +110,20 @@ class KeyChanger : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         }
 
 
-        val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         val toggle = ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer.setDrawerListener(toggle)
         toggle.syncState()
 
-        val navigationView = findViewById(R.id.nav_view) as NavigationView
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
 
         navigationView.menu.getItem(1).isChecked = true
     }
 
     override fun onBackPressed() {
-        val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START)
         } else {
@@ -178,7 +178,7 @@ class KeyChanger : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
 
         }
 
-        val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawer.closeDrawer(GravityCompat.START)
         return true
     }

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -53,7 +54,7 @@ public class CompositionView extends View {
         paint.setColor(Color.BLACK);
     }
     @Override
-    @TargetApi(21)
+   // @TargetApi(21)
     public void onDraw(Canvas c){
         paint.setStrokeWidth(10);
         for (int i = 2; i < 7; i++){
@@ -70,7 +71,7 @@ public class CompositionView extends View {
                     noteHeadID = R.drawable.quarter_note_head;
                 }
 
-                VectorDrawable noteHead = (VectorDrawable) getResources().getDrawable(noteHeadID);
+                Drawable noteHead =  getResources().getDrawable(noteHeadID);
                 Bitmap nh = NoteBitmap.getBitmap(noteHead);
                 c.drawBitmap(Bitmap.createScaledBitmap(nh, (int) (DensityMetrics.getSpaceHeight() * 1.697), (int) DensityMetrics.getSpaceHeight(), true), (int) drawX , note.getY() - DensityMetrics.getSpaceHeight() / 2, paint);
 

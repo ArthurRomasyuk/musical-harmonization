@@ -6,6 +6,6 @@ package com.devs.musicalharmonization.singletons
 object Key {
 
     //todo avoid this singleton
-    public var COUNT = 0
-    public var SHARP = true
+    var COUNT = 0
+    var SHARP = true
 }

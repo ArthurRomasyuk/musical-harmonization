@@ -20,31 +20,31 @@ class ClefChanger : AppCompatActivity(), NavigationView.OnNavigationItemSelected
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_clef_changer)
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
 
-        val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         val toggle = ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer.setDrawerListener(toggle)
         toggle.syncState()
 
-        val navigationView = findViewById(R.id.nav_view) as NavigationView
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
 
         //Clef Buttons
-        val treble = findViewById(R.id.treble_clef_button) as ImageButton
+        val treble = findViewById<ImageButton>(R.id.treble_clef_button)
         treble.setOnClickListener { ClefSetting.clef = Clef.TREBLE }
 
-        val alto = findViewById(R.id.alto_clef_button) as ImageButton
+        val alto = findViewById<ImageButton>(R.id.alto_clef_button)
         alto.setOnClickListener { ClefSetting.clef = Clef.ALTO }
-        val bass = findViewById(R.id.bass_clef_button) as ImageButton
+        val bass = findViewById<ImageButton>(R.id.bass_clef_button)
         bass.setOnClickListener { ClefSetting.clef = Clef.BASS }
     }
 
     override fun onBackPressed() {
-        val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START)
         } else {
@@ -99,7 +99,7 @@ class ClefChanger : AppCompatActivity(), NavigationView.OnNavigationItemSelected
 
         }
 
-        val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawer.closeDrawer(GravityCompat.START)
         return true
     }

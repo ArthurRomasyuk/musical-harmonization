@@ -19,6 +19,7 @@ import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.AppCompatDelegate
 import android.support.v7.widget.SwitchCompat
 import android.support.v7.widget.Toolbar
 import android.util.Log
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         setContentView(R.layout.activity_main)
         val con = this
         ev = findViewById(R.id.editor_canvas)
@@ -60,8 +62,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val preferences: SharedPreferences = getSharedPreferences(PREFS_NAME, 0)
         val editor: SharedPreferences.Editor = preferences.edit()
 
-        val navigationView = findViewById(R.id.nav_view) as NavigationView
-        val singleTap = navigationView.menu.getItem(0).actionView.findViewById(R.id.singletap_switch) as SwitchCompat
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
+        val singleTap = navigationView.menu.getItem(0).actionView.findViewById<SwitchCompat>(R.id.singletap_switch)
 
         singleTap.isChecked = preferences.getBoolean("single_tap", false)
        /* Settings.piano = preferences.getBoolean("single_tap", false)
@@ -86,7 +88,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             NoteBitmap.hnh = NoteBitmap.getBitmap(halfNoteHead)
         }).start()
         //DP.r = resources
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         DensityMetrics.toolbar = toolbar
         val settings = getSharedPreferences(PREFS_NAME, 0)
@@ -103,13 +105,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         //Setting the correct media stream
         volumeControlStream = AudioManager.STREAM_MUSIC
 
-        val upInc = findViewById(R.id.inc_octave) as ImageButton
+        val upInc = findViewById<ImageButton>(R.id.inc_octave)
         upInc.setOnClickListener { Octave.octave += 1 }
 
-        val downDec = findViewById(R.id.dec_octave) as ImageButton
+        val downDec = findViewById<ImageButton>(R.id.dec_octave)
         downDec.setOnClickListener { Octave.octave -= 1 }
 
-        dl = findViewById(R.id.drawer_layout) as DrawerLayout
+        dl = findViewById<DrawerLayout>(R.id.drawer_layout)
         val toggle = ActionBarDrawerToggle(
                 this, dl, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         dl?.setDrawerListener(toggle)
@@ -120,31 +122,31 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         /*val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.setOnClickListener { nextInput() }*/
-        val rhythmMenu: FloatingActionMenu = findViewById(R.id.rhythm_menu) as FloatingActionMenu
+        val rhythmMenu: FloatingActionMenu = findViewById<FloatingActionMenu>(R.id.rhythm_menu)
         REGULAR_COLOR = rhythmMenu.menuButtonColorNormal
         //Loading fabs
-        val fab_sixteenth: FloatingActionButton = findViewById(R.id.sixteenth_note) as FloatingActionButton
+        val fab_sixteenth: FloatingActionButton = findViewById<FloatingActionButton>(R.id.sixteenth_note)
         fab_sixteenth.setOnClickListener {
             LastRhythm.value = .25
             rhythmMenu.close(true)
         }
 
-        val fab_eighth: FloatingActionButton = findViewById(R.id.eighth_note) as FloatingActionButton
+        val fab_eighth: FloatingActionButton = findViewById<FloatingActionButton>(R.id.eighth_note)
         fab_eighth.setOnClickListener {
             LastRhythm.value = .5
             rhythmMenu.close(true)
         }
-        val fab_quarter: FloatingActionButton = findViewById(R.id.quarter_note) as FloatingActionButton
+        val fab_quarter: FloatingActionButton = findViewById<FloatingActionButton>(R.id.quarter_note)
         fab_quarter.setOnClickListener {
             LastRhythm.value = 1.0
             rhythmMenu.close(true)
         }
-        val fab_half: FloatingActionButton = findViewById(R.id.half_note) as FloatingActionButton
+        val fab_half: FloatingActionButton = findViewById<FloatingActionButton>(R.id.half_note)
         fab_half.setOnClickListener {
             LastRhythm.value = 2.0
             rhythmMenu.close(true)
         }
-        val fab_whole: FloatingActionButton = findViewById(R.id.whole_note) as FloatingActionButton
+        val fab_whole: FloatingActionButton = findViewById<FloatingActionButton>(R.id.whole_note)
         fab_whole.setOnClickListener {
             LastRhythm.value = 4.0
             rhythmMenu.close(true)
@@ -200,7 +202,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
     override fun onBackPressed() {
-        val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START)
         } else {
@@ -266,7 +268,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
 
-        val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawer.closeDrawer(GravityCompat.START)
         return true
     }

@@ -84,7 +84,7 @@ class EditorView : View {
         paint.color = Color.BLACK
     }
 
-    @TargetApi(21)
+  //  @TargetApi(21)
     public override fun onDraw(c: Canvas) {
         // navigation bar height
 
@@ -236,7 +236,7 @@ class EditorView : View {
                 accidental = 1
             }
             if (velX < -5000) {
-                LastRhythm.dot = true;
+                LastRhythm.dot = true
             }
 
             return true
