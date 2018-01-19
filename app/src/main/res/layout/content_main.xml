@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/lib/com.devs.musicalharmonization"
     xmlns:tools="http://schemas.android.com/tools"
-
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -12,6 +11,8 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.devs.musicalharmonization.activity.MainActivity"
     tools:showIn="@layout/app_bar_main">
+    <!--xmlns:app="http://schemas.android.com/apk/lib/com.devs.musicalharmonization"-->
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -85,33 +86,31 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/sixteenth_note"
-            app:srcCompat="@drawable/music_note_sixteenth" />
+            />
 
         <com.github.clans.fab.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/eighth_note"
-            app:srcCompat="@drawable/music_note_eighth"
-
             />
 
         <com.github.clans.fab.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/quarter_note"
-            app:srcCompat="@drawable/music_note_quarter" />
+            />
 
         <com.github.clans.fab.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/half_note"
-            app:srcCompat="@drawable/music_note_half" />
+            />
 
         <com.github.clans.fab.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/whole_note"
-            app:srcCompat="@drawable/music_note_whole" />
+            />
 
     </com.github.clans.fab.FloatingActionMenu>
     </RelativeLayout>

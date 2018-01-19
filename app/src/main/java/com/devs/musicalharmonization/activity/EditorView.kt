@@ -99,13 +99,15 @@ class EditorView : View {
         DensityMetrics.spaceHeight = ((y - DensityMetrics.getToolbarHeight()) / 8)
         paint.strokeWidth = 10f
         for (i in 2..6) {
-            c.drawLine(20f, DensityMetrics.spaceHeight * i + DensityMetrics.getToolbarHeight(), x - 20, DensityMetrics.spaceHeight * i + DensityMetrics.getToolbarHeight(), paint)
+            c.drawLine(20f, DensityMetrics.spaceHeight * i + DensityMetrics.getToolbarHeight(), x - 20,
+                    DensityMetrics.spaceHeight * i + DensityMetrics.getToolbarHeight(), paint)
         }
 
         val altoClef = DensityMetrics.getToolbarHeight() + 2 * DensityMetrics.spaceHeight
         if (ClefSetting.clef == Clef.ALTO) {
             val b = BitmapFactory.decodeResource(resources, R.drawable.alto_clef)
-            c.drawBitmap(Bitmap.createScaledBitmap(b, (4 * DensityMetrics.spaceHeight.toInt() / 1.5).toInt(), 4 * DensityMetrics.spaceHeight.toInt(), true), 20f, altoClef, paint)
+            c.drawBitmap(Bitmap.createScaledBitmap(b, (4 * DensityMetrics.spaceHeight.toInt() / 1.5).toInt(),
+                    4 * DensityMetrics.spaceHeight.toInt(), true), 20f, altoClef, paint)
 
         } else if (ClefSetting.clef == Clef.TREBLE) {
             val b = BitmapFactory.decodeResource(resources, R.drawable.treble_clef)

@@ -46,6 +46,10 @@ class Note(var x: Float, yC: Float, acc: Int) {
 
     private val ALTO_POSN = ArrayList<NotePosn>()
 
+    public fun getAccidental (): Int{
+        return this.accidental
+    }
+
     private fun getNotePosn(y: Float, clef: Clef): ArrayList<NotePosn> {
         var iterArray : Array<NoteName?> = arrayOfNulls<NoteName>(9)
         var res: ArrayList<NotePosn> = ArrayList()
@@ -184,6 +188,8 @@ class Note(var x: Float, yC: Float, acc: Int) {
         }
         return snapY
     }
+
+
 
 
 }

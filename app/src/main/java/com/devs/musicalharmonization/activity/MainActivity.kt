@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.PendingIntent.getActivity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
@@ -20,6 +21,7 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.app.AppCompatDelegate
+import android.support.v7.widget.AppCompatDrawableManager
 import android.support.v7.widget.SwitchCompat
 import android.support.v7.widget.Toolbar
 import android.util.Log
@@ -41,6 +43,7 @@ import com.github.clans.fab.FloatingActionMenu
 import java.util.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+
     internal var rBar: LinearLayout? = null
     internal var showCaseIterator: Int = 0
     internal var ev: View? = null
@@ -56,8 +59,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         setContentView(R.layout.activity_main)
         val con = this
-        ev = findViewById(R.id.editor_canvas)
-
+//        ev = findViewById(R.id.editor_canvas)
+        ev = findViewById(R.id.editor_canvas);
         //Loading Prefs
         val preferences: SharedPreferences = getSharedPreferences(PREFS_NAME, 0)
         val editor: SharedPreferences.Editor = preferences.edit()
@@ -126,27 +129,42 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         REGULAR_COLOR = rhythmMenu.menuButtonColorNormal
         //Loading fabs
         val fab_sixteenth: FloatingActionButton = findViewById<FloatingActionButton>(R.id.sixteenth_note)
+        fab_sixteenth.setImageDrawable(
+                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_sixteenth)
+        )
         fab_sixteenth.setOnClickListener {
             LastRhythm.value = .25
             rhythmMenu.close(true)
         }
 
         val fab_eighth: FloatingActionButton = findViewById<FloatingActionButton>(R.id.eighth_note)
+        fab_eighth.setImageDrawable(
+                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_eighth)
+        )
         fab_eighth.setOnClickListener {
             LastRhythm.value = .5
             rhythmMenu.close(true)
         }
         val fab_quarter: FloatingActionButton = findViewById<FloatingActionButton>(R.id.quarter_note)
+        fab_quarter.setImageDrawable(
+                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_quarter)
+        )
         fab_quarter.setOnClickListener {
             LastRhythm.value = 1.0
             rhythmMenu.close(true)
         }
         val fab_half: FloatingActionButton = findViewById<FloatingActionButton>(R.id.half_note)
+        fab_half.setImageDrawable(
+                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_half)
+        )
         fab_half.setOnClickListener {
             LastRhythm.value = 2.0
             rhythmMenu.close(true)
         }
         val fab_whole: FloatingActionButton = findViewById<FloatingActionButton>(R.id.whole_note)
+        fab_whole.setImageDrawable(
+                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_whole)
+        )
         fab_whole.setOnClickListener {
             LastRhythm.value = 4.0
             rhythmMenu.close(true)

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/lib/com.devs.musicalharmonization"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context="com.devs.musicalharmonization.activity.Composition">
+    <!--xmlns:app="http://schemas.android.com/apk/lib/com.devs.musicalharmonization"-->
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -22,6 +23,45 @@
     </android.support.design.widget.AppBarLayout>
 
     <include layout="@layout/content_composition" />
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/composition_rhythm_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="@dimen/fab_margin"
+        app:menu_icon="@drawable/ic_audiotrack_24dp_white">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/composition_sixteenth_note"
+            />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/composition_eighth_note"
+            />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/composition_quarter_note"
+            />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/composition_half_note"
+            />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/composition_whole_note"
+            />
+
+    </com.github.clans.fab.FloatingActionMenu>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
