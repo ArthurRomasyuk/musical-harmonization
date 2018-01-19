@@ -231,7 +231,7 @@ public class CompositionView extends View {
                     //if (Settings.piano) {
 
                     nextInput();
-                    invalidate();
+//                    invalidate();
 
 
                     //}
