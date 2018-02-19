@@ -11,15 +11,17 @@ import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
+import com.devs.musicalharmonization.Note
 import com.devs.musicalharmonization.R
 import com.devs.musicalharmonization.singletons.Key
+import com.devs.musicalharmonization.singletons.Utils
 
 class KeyChanger : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        val sendBack = Intent(this, MainActivity::class.java)
+        val sendBack = Intent(this, Composition::class.java)
         setContentView(R.layout.activity_key_changer)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -29,6 +31,7 @@ class KeyChanger : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         C.setOnClickListener {
             Key.COUNT = 0
             Key.SHARP = true
+            Key.startNote = Note.NoteName.c
             startActivity(sendBack)
         }
 
@@ -37,6 +40,7 @@ class KeyChanger : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         F.setOnClickListener {
             Key.COUNT = 1
             Key.SHARP = false
+            Key.startNote = Note.NoteName.f
             startActivity(sendBack)
         }
 
@@ -44,30 +48,35 @@ class KeyChanger : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         Bf.setOnClickListener {
             Key.COUNT = 2
             Key.SHARP = false
+            Key.startNote = Note.NoteName.`as`
             startActivity(sendBack)
         }
         val Ef = findViewById<Button>(R.id.key_ef)
         Ef.setOnClickListener {
             Key.COUNT = 3
             Key.SHARP = false
+            Key.startNote = Note.NoteName.ds
             startActivity(sendBack)
         }
         val Af = findViewById<Button>(R.id.key_af)
         Af.setOnClickListener {
             Key.COUNT = 4
             Key.SHARP = false
+            Key.startNote = Note.NoteName.gs
             startActivity(sendBack)
         }
         val Df = findViewById<Button>(R.id.key_df)
         Df.setOnClickListener {
             Key.COUNT = 5
             Key.SHARP = false
+            Key.startNote = Note.NoteName.cs
             startActivity(sendBack)
         }
         val Gf = findViewById<Button>(R.id.key_gf)
         Gf.setOnClickListener {
             Key.COUNT = 6
             Key.SHARP = false
+            Key.startNote = Note.NoteName.fs
             startActivity(sendBack)
         }
         //SHARPS
@@ -75,6 +84,7 @@ class KeyChanger : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         G.setOnClickListener {
             Key.COUNT = 1
             Key.SHARP = true
+            Key.startNote = Note.NoteName.g
             startActivity(sendBack)
         }
 
@@ -82,30 +92,35 @@ class KeyChanger : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         D.setOnClickListener {
             Key.COUNT = 2
             Key.SHARP = true
+            Key.startNote = Note.NoteName.d
             startActivity(sendBack)
         }
         val A = findViewById<Button>(R.id.key_a)
         A.setOnClickListener {
             Key.COUNT = 3
             Key.SHARP = true
+            Key.startNote = Note.NoteName.a
             startActivity(sendBack)
         }
         val E = findViewById<Button>(R.id.key_e)
         E.setOnClickListener {
             Key.COUNT = 4
             Key.SHARP = true
+            Key.startNote = Note.NoteName.e
             startActivity(sendBack)
         }
         val B = findViewById<Button>(R.id.key_b)
         B.setOnClickListener {
             Key.COUNT = 5
             Key.SHARP = true
+            Key.startNote = Note.NoteName.b
             startActivity(sendBack)
         }
         val Fs = findViewById<Button>(R.id.key_fs)
         Fs.setOnClickListener {
             Key.COUNT = 6
             Key.SHARP = true
+            Key.startNote = Note.NoteName.fs
             startActivity(sendBack)
         }
 

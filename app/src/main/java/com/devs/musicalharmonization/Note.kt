@@ -1,11 +1,7 @@
 package com.devs.musicalharmonization
 
 import com.devs.musicalharmonization.midi.unused.Clef
-import com.devs.musicalharmonization.singletons.Octave
-import com.devs.musicalharmonization.singletons.ClefSetting
-import com.devs.musicalharmonization.singletons.DensityMetrics
-import com.devs.musicalharmonization.singletons.Key
-import com.devs.musicalharmonization.singletons.LastRhythm
+import com.devs.musicalharmonization.singletons.*
 import java.util.*
 
 /**
@@ -22,6 +18,19 @@ class Note(var x: Float, yC: Float, acc: Int) {
     internal var accidental: Int = acc
     internal var SHARPS = arrayOf(arrayOf(NoteName.f, NoteName.fs), arrayOf(NoteName.c, NoteName.cs), arrayOf(NoteName.g, NoteName.gs), arrayOf(NoteName.d, NoteName.ds), arrayOf(NoteName.a, NoteName.`as`), arrayOf(NoteName.e, NoteName.f), arrayOf(NoteName.b, NoteName.c))
     internal var FLATS = arrayOf(arrayOf(NoteName.b, NoteName.`as`), arrayOf(NoteName.e, NoteName.ds), arrayOf(NoteName.a, NoteName.gs), arrayOf(NoteName.d, NoteName.cs), arrayOf(NoteName.g, NoteName.fs), arrayOf(NoteName.c, NoteName.b), arrayOf(NoteName.f, NoteName.e))
+    var isLastInBar:Boolean = false;
+    var chord: Chord? = null
+    var degree:Int=0
+    var pitch:Int=0
+    var drawX:Float= 0F
+
+
+    enum class Chord{
+        T,
+        S,
+        D,
+        K
+    }
 
     enum class NoteName {
         c,
@@ -169,7 +178,13 @@ class Note(var x: Float, yC: Float, acc: Int) {
             r = LastRhythm.value * 1.5
         }
         rhythm = r
+        pitch = Utils.nameToNum(this)
+        Utils.determineDegreeForNote(this)
+    }
 
+    fun changeOctave(newOctave: Int){
+        octave = newOctave
+//        pitch = Utils.nameToNum(this)
     }
 
 
@@ -188,8 +203,5 @@ class Note(var x: Float, yC: Float, acc: Int) {
         }
         return snapY
     }
-
-
-
 
 }

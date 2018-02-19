@@ -8,5 +8,5 @@ import com.devs.musicalharmonization.midi.unused.Clef;
 public class ClefSetting {
 
     //todo avoid this singleton
-    public static Clef clef = Clef.ALTO;
+    public static Clef clef = Clef.TREBLE;
 }

@@ -34,10 +34,7 @@ import android.widget.LinearLayout
 import com.devs.musicalharmonization.Note
 import com.devs.musicalharmonization.NoteBitmap
 import com.devs.musicalharmonization.R
-import com.devs.musicalharmonization.singletons.Octave
-import com.devs.musicalharmonization.singletons.DensityMetrics
-import com.devs.musicalharmonization.singletons.LastRhythm
-import com.devs.musicalharmonization.singletons.MusicStore
+import com.devs.musicalharmonization.singletons.*
 import com.github.clans.fab.FloatingActionButton
 import com.github.clans.fab.FloatingActionMenu
 import java.util.*
@@ -123,101 +120,109 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         navigationView.setNavigationItemSelectedListener(this)
 
+
+        startActivity(Intent(this,Composition::class.java))
+
         /*val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.setOnClickListener { nextInput() }*/
-        val rhythmMenu: FloatingActionMenu = findViewById<FloatingActionMenu>(R.id.rhythm_menu)
-        REGULAR_COLOR = rhythmMenu.menuButtonColorNormal
-        //Loading fabs
-        val fab_sixteenth: FloatingActionButton = findViewById<FloatingActionButton>(R.id.sixteenth_note)
-        fab_sixteenth.setImageDrawable(
-                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_sixteenth)
-        )
-        fab_sixteenth.setOnClickListener {
-            LastRhythm.value = .25
-            rhythmMenu.close(true)
-        }
-
-        val fab_eighth: FloatingActionButton = findViewById<FloatingActionButton>(R.id.eighth_note)
-        fab_eighth.setImageDrawable(
-                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_eighth)
-        )
-        fab_eighth.setOnClickListener {
-            LastRhythm.value = .5
-            rhythmMenu.close(true)
-        }
-        val fab_quarter: FloatingActionButton = findViewById<FloatingActionButton>(R.id.quarter_note)
-        fab_quarter.setImageDrawable(
-                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_quarter)
-        )
-        fab_quarter.setOnClickListener {
-            LastRhythm.value = 1.0
-            rhythmMenu.close(true)
-        }
-        val fab_half: FloatingActionButton = findViewById<FloatingActionButton>(R.id.half_note)
-        fab_half.setImageDrawable(
-                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_half)
-        )
-        fab_half.setOnClickListener {
-            LastRhythm.value = 2.0
-            rhythmMenu.close(true)
-        }
-        val fab_whole: FloatingActionButton = findViewById<FloatingActionButton>(R.id.whole_note)
-        fab_whole.setImageDrawable(
-                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_whole)
-        )
-        fab_whole.setOnClickListener {
-            LastRhythm.value = 4.0
-            rhythmMenu.close(true)
-        }
-
-
-        var set: AnimatorSet = AnimatorSet()
-
-        var scaleOutX: ObjectAnimator = ObjectAnimator.ofFloat(rhythmMenu.menuIconView, "scaleX", 1.0f, 0.2f)
-        var scaleOutY: ObjectAnimator = ObjectAnimator.ofFloat(rhythmMenu.menuIconView, "scaleY", 1.0f, 0.2f)
-        var scaleInX: ObjectAnimator = ObjectAnimator.ofFloat(rhythmMenu.menuIconView, "scaleX", 0.2f, 1.0f)
-        var scaleInY: ObjectAnimator = ObjectAnimator.ofFloat(rhythmMenu.menuIconView, "scaleY", 0.2f, 1.0f)
-
-        scaleOutX.duration = 50
-        scaleOutY.duration = 50
-        scaleInX.duration = 150
-        scaleInY.duration = 150
-
-        scaleInX.addListener(object : AnimatorListenerAdapter() {
-
-            override fun onAnimationStart(animation: Animator) {
-                rhythmMenu.menuIconView.setImageResource(if (rhythmMenu.isOpened)
-                    R.drawable.ic_audiotrack_24dp_white
-                else
-                    R.drawable.ic_close_white_24dp)
-                if (!rhythmMenu.isOpened) {
-                    when (LastRhythm.value) {
-                        4.0 -> fab_whole.colorNormal = SELECTED_COLOR
-                        2.0 -> fab_half.colorNormal = SELECTED_COLOR
-                        1.0 -> fab_quarter.colorNormal = SELECTED_COLOR
-                        .5 -> fab_eighth.colorNormal = SELECTED_COLOR
-                        .25 -> fab_sixteenth.colorNormal = SELECTED_COLOR
-                    }
-                } else {
-                    fab_whole.colorNormal = REGULAR_COLOR
-                    fab_half.colorNormal = REGULAR_COLOR
-                    fab_quarter.colorNormal = REGULAR_COLOR
-                    fab_eighth.colorNormal = REGULAR_COLOR
-                    fab_sixteenth.colorNormal = REGULAR_COLOR
-
-
-                }
-            }
-        })
-        set.play(scaleOutX).with(scaleOutY)
-        set.play(scaleInX).with(scaleInY).after(scaleOutX)
-        set.interpolator = OvershootInterpolator(2f)
-
-        rhythmMenu.iconToggleAnimatorSet = set
+//        val rhythmMenu: FloatingActionMenu = findViewById<FloatingActionMenu>(R.id.rhythm_menu)
+//        rhythmMenu.menuIconView.setImageResource(R.drawable.ic_audiotrack_24dp_white)
+//        REGULAR_COLOR = rhythmMenu.menuButtonColorNormal
+//        //Loading fabs
+//        val fab_sixteenth: FloatingActionButton = findViewById<FloatingActionButton>(R.id.sixteenth_note)
+//        fab_sixteenth.setImageDrawable(
+//                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_sixteenth)
+//        )
+//        fab_sixteenth.setOnClickListener {
+//            LastRhythm.value = .25
+//            rhythmMenu.close(true)
+//        }
+//
+//        val fab_eighth: FloatingActionButton = findViewById<FloatingActionButton>(R.id.eighth_note)
+//        fab_eighth.setImageDrawable(
+//                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_eighth)
+//        )
+//        fab_eighth.setOnClickListener {
+//            LastRhythm.value = .5
+//            rhythmMenu.close(true)
+//        }
+//        val fab_quarter: FloatingActionButton = findViewById<FloatingActionButton>(R.id.quarter_note)
+//        fab_quarter.setImageDrawable(
+//                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_quarter)
+//        )
+//        fab_quarter.setOnClickListener {
+//            LastRhythm.value = 1.0
+//            rhythmMenu.close(true)
+//        }
+//        val fab_half: FloatingActionButton = findViewById<FloatingActionButton>(R.id.half_note)
+//        fab_half.setImageDrawable(
+//                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_half)
+//        )
+//        fab_half.setOnClickListener {
+//            LastRhythm.value = 2.0
+//            rhythmMenu.close(true)
+//        }
+//        val fab_whole: FloatingActionButton = findViewById<FloatingActionButton>(R.id.whole_note)
+//        fab_whole.setImageDrawable(
+//                AppCompatDrawableManager.get().getDrawable(this, R.drawable.music_note_whole)
+//        )
+//        fab_whole.setOnClickListener {
+//            LastRhythm.value = 4.0
+//            rhythmMenu.close(true)
+//        }
+//
+//
+//        var set: AnimatorSet = AnimatorSet()
+//
+//        var scaleOutX: ObjectAnimator = ObjectAnimator.ofFloat(rhythmMenu.menuIconView, "scaleX", 1.0f, 0.2f)
+//        var scaleOutY: ObjectAnimator = ObjectAnimator.ofFloat(rhythmMenu.menuIconView, "scaleY", 1.0f, 0.2f)
+//        var scaleInX: ObjectAnimator = ObjectAnimator.ofFloat(rhythmMenu.menuIconView, "scaleX", 0.2f, 1.0f)
+//        var scaleInY: ObjectAnimator = ObjectAnimator.ofFloat(rhythmMenu.menuIconView, "scaleY", 0.2f, 1.0f)
+//
+//        scaleOutX.duration = 50
+//        scaleOutY.duration = 50
+//        scaleInX.duration = 150
+//        scaleInY.duration = 150
+//
+//        scaleInX.addListener(object : AnimatorListenerAdapter() {
+//
+//            override fun onAnimationStart(animation: Animator) {
+//                rhythmMenu.menuIconView.setImageResource(if (rhythmMenu.isOpened)
+//                    R.drawable.ic_audiotrack_24dp_white
+//                else
+//                    R.drawable.ic_close_white_24dp)
+//                if (!rhythmMenu.isOpened) {
+//                    when (LastRhythm.value) {
+//                        4.0 -> fab_whole.colorNormal = SELECTED_COLOR
+//                        2.0 -> fab_half.colorNormal = SELECTED_COLOR
+//                        1.0 -> fab_quarter.colorNormal = SELECTED_COLOR
+//                        .5 -> fab_eighth.colorNormal = SELECTED_COLOR
+//                        .25 -> fab_sixteenth.colorNormal = SELECTED_COLOR
+//                    }
+//                } else {
+//                    fab_whole.colorNormal = REGULAR_COLOR
+//                    fab_half.colorNormal = REGULAR_COLOR
+//                    fab_quarter.colorNormal = REGULAR_COLOR
+//                    fab_eighth.colorNormal = REGULAR_COLOR
+//                    fab_sixteenth.colorNormal = REGULAR_COLOR
+//
+//
+//                }
+//            }
+//        })
+//        set.play(scaleOutX).with(scaleOutY)
+//        set.play(scaleInX).with(scaleInY).after(scaleOutX)
+//        set.interpolator = OvershootInterpolator(2f)
+//
+//        rhythmMenu.iconToggleAnimatorSet = set
 
 
     }
 
+//    override fun onResume() {
+//        super.onResume()
+//        startActivity(Intent(this,Composition::class.java))
+//    }
 
     override fun onBackPressed() {
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
@@ -244,8 +249,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true
-        } else if (id == R.id.action_skip) {
-            nextInput()
+        } else if (id == R.id.harmony) {
+            if(item.isChecked){
+                // If item already checked then unchecked it
+                item.setChecked(false)
+//                item.isChecked = false
+                Utils.wasCheckedHarmonyView = false;
+            }else{
+                // If item is unchecked then checked it
+                item.setChecked(true)
+//                item.isChecked = true
+                Utils.wasCheckedHarmonyView = true
+            }
+            // Update the text view text style
+//        } else if (id == R.id.action_skip) {
+//            nextInput()
         } else if (id == R.id.action_undo) {
             if (MusicStore.activeNotes.size == 0) {
                 if (MusicStore.sheet.size > 0) {
@@ -270,7 +288,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         } else if (id == R.id.nav_keys) {
             val sendToKeys = Intent(this, KeyChanger::class.java)
             startActivity(sendToKeys)
-
         } else if (id == R.id.nav_clefs) {
             val sendToClefs = Intent(this, ClefChanger::class.java)
             startActivity(sendToClefs)

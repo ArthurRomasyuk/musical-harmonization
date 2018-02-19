@@ -1,18 +1,13 @@
 package com.devs.musicalharmonization.activity;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -20,18 +15,21 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.devs.musicalharmonization.R;
 import com.devs.musicalharmonization.midi.unused.Clef;
+import com.devs.musicalharmonization.singletons.Bar;
 import com.devs.musicalharmonization.singletons.ClefSetting;
 import com.devs.musicalharmonization.singletons.DensityMetrics;
 import com.devs.musicalharmonization.singletons.LastRhythm;
 import com.devs.musicalharmonization.singletons.MusicStore;
 import com.devs.musicalharmonization.Note;
 import com.devs.musicalharmonization.NoteBitmap;
+import com.devs.musicalharmonization.singletons.Utils;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -46,6 +44,7 @@ public class CompositionView extends View {
     float touchX = 0f;
     float touchY = 0f;
     boolean drawNote = false;
+    boolean drawBarLine = false;
     Paint paint = new Paint();
     Context conx;
     public final float NOTE_WIDTH = 150;
@@ -55,39 +54,32 @@ public class CompositionView extends View {
     private float STAFF_WIDTH;
     DisplayMetrics displayMetrics;
     WindowManager manager;
+    private File noteSound;
+    private float distanceBetweenNotes;
+    private Bitmap scaledClefBitmap;
+    private Bitmap scaledBassClefBitmap;
+    private float altoClefTop;
+    private float trebleClefTop;
+    private float bassClefTop;
+    private float secondSheetBassClefTop;
+
 
     public CompositionView(Context con) {
         super(con);
-        conx = con;
-        setFocusable(true);
-        setFocusableInTouchMode(true);
-        mDetector = new GestureDetector(this.getContext(), new mListener());
-        displayMetrics = new DisplayMetrics();
-        manager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-        manager.getDefaultDisplay().getMetrics(displayMetrics);
-        height = displayMetrics.heightPixels;
-        width = displayMetrics.widthPixels;
-        STAFF_WIDTH = MusicStore.sheet.size() * 600 + width;
-        paint.setColor(Color.BLACK);
+        init(con);
     }
 
     public CompositionView(Context con, AttributeSet attrs) {
         super(con, attrs);
-        conx = con;
-        setFocusable(true);
-        setFocusableInTouchMode(true);
-        mDetector = new GestureDetector(this.getContext(), new mListener());
-        displayMetrics = new DisplayMetrics();
-        manager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-        manager.getDefaultDisplay().getMetrics(displayMetrics);
-        height = displayMetrics.heightPixels;
-        width = displayMetrics.widthPixels;
-        STAFF_WIDTH = MusicStore.sheet.size() * 600 + width;
-        paint.setColor(Color.BLACK);
+        init(con);
     }
 
     public CompositionView(Context con, AttributeSet attrs, int defStyle) {
         super(con, attrs, defStyle);
+        init(con);
+    }
+
+    private void init(Context con) {
         conx = con;
         setFocusable(true);
         setFocusableInTouchMode(true);
@@ -97,92 +89,177 @@ public class CompositionView extends View {
         manager.getDefaultDisplay().getMetrics(displayMetrics);
         height = displayMetrics.heightPixels;
         width = displayMetrics.widthPixels;
-        STAFF_WIDTH = MusicStore.sheet.size() * 600 + width;
         paint.setColor(Color.BLACK);
-    }
+        distanceBetweenNotes = 300;
+        STAFF_WIDTH = MusicStore.sheet.size() * distanceBetweenNotes + width;
 
+
+    }
 
 
     @Override
     // @TargetApi(21)
     public void onDraw(Canvas c) {
-        manager.getDefaultDisplay().getMetrics(displayMetrics);
-        height = displayMetrics.heightPixels;
-        width = displayMetrics.widthPixels;
-        STAFF_WIDTH = MusicStore.sheet.size() * 600 + width;
-        requestLayout();
-        DensityMetrics.setSpaceHeight((height - DensityMetrics.Companion.getToolbarHeight()) / 16);
-        paint.setStrokeWidth(10);
-        for (int i = 2; i < 13; i++) {
-            if(i!=7) {
-                c.drawLine(0, DensityMetrics.getSpaceHeight() * i + DensityMetrics.Companion.getToolbarHeight(), STAFF_WIDTH, DensityMetrics.getSpaceHeight() * i +
-                        DensityMetrics.Companion.getToolbarHeight(), paint);
-            }
-        }
-
-        float altoClefTop = DensityMetrics.Companion.getToolbarHeight() + 2 * DensityMetrics.getSpaceHeight();
-        float trebleClefTop = DensityMetrics.Companion.getToolbarHeight() + DensityMetrics.getSpaceHeight();
-        float bassClefTop = DensityMetrics.Companion.getToolbarHeight() + 2* DensityMetrics.getSpaceHeight();
-        float secondSheetBassClefTop = DensityMetrics.Companion.getToolbarHeight() + 8* DensityMetrics.getSpaceHeight();
+        float toolbarHeight = DensityMetrics.Companion.getToolbarHeight();
+        DensityMetrics.setSpaceHeight((height - toolbarHeight) / 16);
+        altoClefTop = toolbarHeight + 2 * DensityMetrics.getSpaceHeight();
+        trebleClefTop = toolbarHeight + DensityMetrics.getSpaceHeight();
+        bassClefTop = toolbarHeight + 2 * DensityMetrics.getSpaceHeight();
+        secondSheetBassClefTop = toolbarHeight + 8 * DensityMetrics.getSpaceHeight();
 
         int altoClefHeight = 4 * (int) DensityMetrics.getSpaceHeight();
         int trebleClefHeight = 6 * (int) DensityMetrics.getSpaceHeight();
         int bassClefHeight = 3 * (int) DensityMetrics.getSpaceHeight();
-
+        int dstWidth = 0;
         if (ClefSetting.clef == Clef.ALTO) {
             Bitmap clefBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.alto_clef);
             int scaledWidth = clefBitmap.getScaledWidth(DisplayMetrics.DENSITY_DEFAULT);
             int scaledHeight = clefBitmap.getScaledHeight(DisplayMetrics.DENSITY_DEFAULT);
-            int dstWidth = altoClefHeight*scaledWidth/scaledHeight;
-            Bitmap scaledClefBitmap = Bitmap.createScaledBitmap(clefBitmap, dstWidth,
+            dstWidth = altoClefHeight * scaledWidth / scaledHeight;
+            scaledClefBitmap = Bitmap.createScaledBitmap(clefBitmap, dstWidth,
                     altoClefHeight, true);
-            c.drawBitmap(scaledClefBitmap, 20f, altoClefTop, paint);
         } else if (ClefSetting.clef == Clef.TREBLE) {
             Bitmap clefBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.treble_clef);
             int scaledWidth = clefBitmap.getScaledWidth(DisplayMetrics.DENSITY_DEFAULT);
             int scaledHeight = clefBitmap.getScaledHeight(DisplayMetrics.DENSITY_DEFAULT);
-            int dstWidth = trebleClefHeight*scaledWidth/scaledHeight;
-            Bitmap scaledClefBitmap = Bitmap.createScaledBitmap(clefBitmap, dstWidth, trebleClefHeight, true);
-            c.drawBitmap(scaledClefBitmap, 1f, trebleClefTop, paint);
+            dstWidth = trebleClefHeight * scaledWidth / scaledHeight;
+            scaledClefBitmap = Bitmap.createScaledBitmap(clefBitmap, dstWidth, trebleClefHeight, true);
         } else if (ClefSetting.clef == Clef.BASS) {
             Bitmap clefBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bass_clef);
             int scaledWidth = clefBitmap.getScaledWidth(DisplayMetrics.DENSITY_DEFAULT);
             int scaledHeight = clefBitmap.getScaledHeight(DisplayMetrics.DENSITY_DEFAULT);
-            int dstWidth = bassClefHeight*scaledWidth/scaledHeight;
-            Bitmap scaledClefBitmap = Bitmap.createScaledBitmap(clefBitmap, dstWidth, bassClefHeight, true);
-            c.drawBitmap(scaledClefBitmap, 1f, bassClefTop, paint);
+            dstWidth = bassClefHeight * scaledWidth / scaledHeight;
+            scaledClefBitmap = Bitmap.createScaledBitmap(clefBitmap, dstWidth, bassClefHeight, true);
         }
 
         Bitmap bassClefBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bass_clef);
         int bassClefScaledWidth = bassClefBitmap.getScaledWidth(DisplayMetrics.DENSITY_DEFAULT);
         int bassClefScaledHeight = bassClefBitmap.getScaledHeight(DisplayMetrics.DENSITY_DEFAULT);
-        int bassClefWidth = bassClefHeight*bassClefScaledWidth/bassClefScaledHeight;
-        Bitmap scaledBassClefBitmap = Bitmap.createScaledBitmap(bassClefBitmap, bassClefWidth, bassClefHeight, true);
-        c.drawBitmap(scaledBassClefBitmap, 1f, secondSheetBassClefTop, paint);
-
-        float drawX = 320;
-        for (ArrayList<Note> chord : MusicStore.sheet) {
-            for (Note note : chord) {
-                int noteHeadID = 0;
-                if (note.getRhythm() == 2) {
-                    noteHeadID = R.drawable.half_note_head;
-
-                } else {
-                    noteHeadID = R.drawable.quarter_note_head;
-                }
-
-                Drawable noteHead = getResources().getDrawable(noteHeadID);
-                Bitmap nh = NoteBitmap.getBitmap(noteHead);
-                c.drawBitmap(Bitmap.createScaledBitmap(nh, (int) (DensityMetrics.getSpaceHeight() * 1.697), (int) DensityMetrics.getSpaceHeight(), true), (int) drawX, note.getY() - DensityMetrics.getSpaceHeight() / 2, paint);
-
+        int bassClefWidth = bassClefHeight * bassClefScaledWidth / bassClefScaledHeight;
+        scaledBassClefBitmap = Bitmap.createScaledBitmap(bassClefBitmap, bassClefWidth, bassClefHeight, true);
+        manager.getDefaultDisplay().getMetrics(displayMetrics);
+//        width = displayMetrics.widthPixels;
+        STAFF_WIDTH = MusicStore.sheet.size() * distanceBetweenNotes + width;
+//        height = displayMetrics.heightPixels;
+//        DensityMetrics.setSpaceHeight((height - DensityMetrics.Companion.getToolbarHeight()) / 16);
+        paint.setStrokeWidth(10);
+        for (int i = 2; i < 13; i++) {
+            if (i != 7) {
+                c.drawLine(0, DensityMetrics.getSpaceHeight() * i + DensityMetrics.Companion.getToolbarHeight(), STAFF_WIDTH, DensityMetrics.getSpaceHeight() * i +
+                        DensityMetrics.Companion.getToolbarHeight(), paint);
             }
-            drawX += 600;
         }
 
+        if (ClefSetting.clef == Clef.ALTO) {
+            c.drawBitmap(scaledClefBitmap, 20f, altoClefTop, paint);
+        } else if (ClefSetting.clef == Clef.TREBLE) {
+            c.drawBitmap(scaledClefBitmap, 1f, trebleClefTop, paint);
+        } else if (ClefSetting.clef == Clef.BASS) {
+            c.drawBitmap(scaledClefBitmap, 1f, bassClefTop, paint);
+        }
+
+        c.drawBitmap(scaledBassClefBitmap, 1f, secondSheetBassClefTop, paint);
+
+        paint.setTextSize(DensityMetrics.getSpaceHeight() * 2);
+        c.drawText(String.valueOf((int) Bar.topNumber), dstWidth + 20f, DensityMetrics.Companion.getToolbarHeight() + DensityMetrics.getSpaceHeight() * 3.5f, paint);
+        c.drawText(String.valueOf((int) Bar.bottomNumber), dstWidth + 20f, DensityMetrics.Companion.getToolbarHeight() + DensityMetrics.getSpaceHeight() * 5.5f, paint);
+
+        float drawX = 320;
+        ArrayList<ArrayList<Note>> sheet;
+//        for (ArrayList<Note> chord : MusicStore.sheet) {
+        if (Utils.Companion.getWasCheckedHarmonyView()) {
+            sheet = MusicStore.sheetAfterGarmonization;
+        } else {
+            sheet = MusicStore.sheet;
+        }
+
+        for (ArrayList<Note> chord : sheet) {
+            int y = 0;
+            for (Note note : chord) {
+                int noteHeadID = 0;
+//                if (note.getRhythm() == 2) {
+//                    noteHeadID = R.drawable.half_note_head;
+//
+//                } else {
+//                    noteHeadID = R.drawable.quarter_note_head;
+//                }
+                note.setDrawX(drawX);
+                int noteWidth = (int) (DensityMetrics.getSpaceHeight() * 3);
+                int noteHeight = (int) (DensityMetrics.getSpaceHeight() * 3.5);
+                if (y % 2 == 0) {
+                    if (note.getRhythm() == 0.25) {
+                        noteHeadID = R.drawable.note_sixteenth;
+                    } else if (note.getRhythm() == 0.5) {
+                        noteHeadID = R.drawable.note_eighth;
+                    } else if (note.getRhythm() == 1) {
+                        noteHeadID = R.drawable.note_quarter;
+                    } else if (note.getRhythm() == 2) {
+                        noteHeadID = R.drawable.note_half;
+                    } else if (note.getRhythm() == 4) {
+                        noteHeadID = R.drawable.note_whole;
+                    }
+
+                    Drawable noteHead = ContextCompat.getDrawable(getContext(), noteHeadID);
+                    noteHead.setColorFilter(Color.BLACK, android.graphics.PorterDuff.Mode.SRC_IN);
+                    ;
+                    Bitmap nh = NoteBitmap.getBitmap(noteHead);
+                    Bitmap noteHeadBitmap = Bitmap.createScaledBitmap(nh, noteWidth, noteHeight, true);
+                    c.drawBitmap(noteHeadBitmap, (int) drawX, note.getY() - noteWidth, paint);
+                } else {
+                    if (note.getRhythm() == 0.25) {
+                        noteHeadID = R.drawable.note_sixteenth_down;
+                    } else if (note.getRhythm() == 0.5) {
+                        noteHeadID = R.drawable.note_eighth_down;
+                    } else if (note.getRhythm() == 1) {
+                        noteHeadID = R.drawable.note_quarter_down;
+                    } else if (note.getRhythm() == 2) {
+                        noteHeadID = R.drawable.note_half_down;
+                    } else if (note.getRhythm() == 4) {
+                        noteHeadID = R.drawable.note_whole_down;
+                    }
+
+                    Drawable noteHead = ContextCompat.getDrawable(getContext(), noteHeadID);
+                    noteHead.setColorFilter(Color.BLACK, android.graphics.PorterDuff.Mode.SRC_IN);
+                    Bitmap nh = NoteBitmap.getBitmap(noteHead);
+                    Bitmap noteHeadBitmap = Bitmap.createScaledBitmap(nh, noteWidth, noteHeight, true);
+                    c.drawBitmap(noteHeadBitmap, (int) drawX, note.getY() - (int) (DensityMetrics.getSpaceHeight() * 0.5), paint);
+                }
+                if (note.isLastInBar()) {
+                    c.drawLine(drawX + DensityMetrics.getSpaceHeight() * 3, DensityMetrics.getSpaceHeight() * 2 + DensityMetrics.Companion.getToolbarHeight(),
+                            drawX + DensityMetrics.getSpaceHeight() * 3, DensityMetrics.getSpaceHeight() * 6 + DensityMetrics.Companion.getToolbarHeight(), paint);
+                    c.drawLine(drawX + DensityMetrics.getSpaceHeight() * 3, DensityMetrics.getSpaceHeight() * 8 + DensityMetrics.Companion.getToolbarHeight(),
+                            drawX + DensityMetrics.getSpaceHeight() * 3, DensityMetrics.getSpaceHeight() * 12 + DensityMetrics.Companion.getToolbarHeight(), paint);
+                }
+                paint.setTextSize(120);
+                if (note.getChord() != null)
+                    switch (note.getChord()) {
+                        case T:
+                            c.drawText("T", drawX + noteWidth / 2, DensityMetrics.Companion.getToolbarHeight() + DensityMetrics.getSpaceHeight(), paint);
+                            break;
+                        case S:
+                            c.drawText("S", drawX + noteWidth / 2, DensityMetrics.Companion.getToolbarHeight() + DensityMetrics.getSpaceHeight(), paint);
+                            break;
+                        case D:
+                            c.drawText("D", drawX + noteWidth / 2, DensityMetrics.Companion.getToolbarHeight() + DensityMetrics.getSpaceHeight(), paint);
+                            break;
+                        case K:
+                            c.drawText("K", drawX + noteWidth / 2, DensityMetrics.Companion.getToolbarHeight() + DensityMetrics.getSpaceHeight(), paint);
+                            break;
+                    }
+                y++;
+            }
+            drawX += distanceBetweenNotes;
+        }
 
         if (drawNote) {
+            requestLayout();
             drawNoteHead(renderableNote, c);
             drawNote = false;
+        }
+
+        if (Utils.Companion.getWasUndoPressed()) {
+            requestLayout();
+            Utils.Companion.setWasUndoPressed(false);
         }
     }
 
@@ -196,56 +273,111 @@ public class CompositionView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean result = false;
-        try {
-            result = mDetector.onTouchEvent(event);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (!result) {
-            Log.d("What", "is this gesture?");
-        }
+        if (!Utils.Companion.getWasCheckedHarmonyView()) {
+            try {
+                result = mDetector.onTouchEvent(event);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (!result) {
+                Log.d("What", "is this gesture?");
+            }
 
-        float x = event.getX();
-        float y = event.getY() - DensityMetrics.Companion.getToolbarHeight();
-        //rhythmBar.setVisibility(View.GONE);
-        if(x>(MusicStore.sheet.size() * 600) && y<(DensityMetrics.getSpaceHeight() * 8)) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    touchX = x;
-                    touchY = y;
-                    break;
-                case MotionEvent.ACTION_UP:
-                    drawNote = true;
-                    invalidate();
-                    renderableNote = new Note(touchX, touchY, accidental);
-                    boolean renderNote = true;
-                    for (Note note : MusicStore.activeNotes) {
-                        if (renderableNote.getName() == note.getName() && renderableNote.getOctave() == note.getOctave()) {
-                            renderNote = false;
-                            Log.d("Note", "Dupe note skipped!");
+            float x = event.getX();
+            float y = event.getY() - DensityMetrics.Companion.getToolbarHeight();
+            //rhythmBar.setVisibility(View.GONE);
+            if (!Utils.Companion.getWasCheckedCadence()) {
+                if (x > (MusicStore.sheet.size() * distanceBetweenNotes) && y < (DensityMetrics.getSpaceHeight() * 7) && y > DensityMetrics.Companion.getToolbarHeight()) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            touchX = x;
+                            touchY = y;
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            drawNote = true;
+                            renderableNote = new Note(touchX, touchY, accidental);
+                            noteSound = Utils.Companion.prepareNote(renderableNote);
+                            double rhythmSum = 0;
+                            double barRhythmSum = 0;
+                            Bar.activeBarNotes.add(renderableNote);
+                            for (Note barNote : Bar.activeBarNotes) {
+                                barRhythmSum += barNote.getRhythm() / 4;
+                            }
+                            double barNumber = Bar.topNumber / Bar.bottomNumber;
+                            if (barRhythmSum > barNumber) {
+                                Toast.makeText(getContext(), "Note with wrong rhythm. Change note rhytm or bar number",
+                                        Toast.LENGTH_LONG).show();
+                                Bar.activeBarNotes.remove(Bar.activeBarNotes.size() - 1);
+                            } else {
+                                MusicStore.activeNotes.add(renderableNote);
+                                MusicStore.sheet.add(MusicStore.activeNotes);
+                                MusicStore.activeNotes = new ArrayList<Note>();
+                                for (ArrayList<Note> chord : MusicStore.sheet) {
+                                    for (Note note : chord) {
+                                        rhythmSum += note.getRhythm();
+                                        double v = rhythmSum / 4;
+                                        boolean b = v % barNumber == 0;
+                                        if (rhythmSum != 0 && b) {
+                                            note.setLastInBar(true);
+                                            Bar.activeBarNotes = new ArrayList<Note>();
+                                        }
+                                    }
+                                }
+                            }
+                            invalidate();
+                            break;
+                    }
+                }
+            } else {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        touchX = x;
+                        touchY = y;
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        ArrayList<Note> chordWithCadence;
+                        for (int a = 0; a < MusicStore.sheet.size(); a++) {
+                            Note chordNote = MusicStore.sheet.get(a).get(0);
+                            float startDrawX = chordNote.getDrawX()+DensityMetrics.getSpaceHeight() * 1.5f - distanceBetweenNotes/2;
+                            float lastDrawX = chordNote.getDrawX()+DensityMetrics.getSpaceHeight() * 1.5f + distanceBetweenNotes/2;
+                            if (x > startDrawX && x < lastDrawX) {
+//                                Utils.Companion.getCadenceChordNumbers().add(a);
+                                Note noteForCadence = MusicStore.sheet.get(a).get(0);
+                                if (noteForCadence.getChord() == Note.Chord.T||(noteForCadence.getChord() == Note.Chord.D&&noteForCadence.getDegree()==5)||
+                                        (noteForCadence.getChord() == Note.Chord.S&&noteForCadence.getDegree()==1)) {
+                                    if (a != 0 && a != MusicStore.sheet.size() - 1) {
+                                        Note.Chord previousNoteChord = MusicStore.sheet.get(a - 1).get(0).getChord();
+                                        Note.Chord nextNoteChord = MusicStore.sheet.get(a + 1).get(0).getChord();
+                                        if ((previousNoteChord == Note.Chord.T || previousNoteChord == Note.Chord.S)
+                                                && nextNoteChord == Note.Chord.D) {
+                                            noteForCadence.setChord(Note.Chord.K);
+                                            invalidate();
+                                        }
+                                    } else if (a != 0 && a == MusicStore.sheet.size() - 1) {
+                                        Note.Chord previousNoteChord = MusicStore.sheet.get(a - 1).get(0).getChord();
+                                        if ((previousNoteChord == Note.Chord.T || previousNoteChord == Note.Chord.S)) {
+                                            noteForCadence.setChord(Note.Chord.K);
+                                            invalidate();
+                                        }
+
+                                    }
+                                }
+                                break;
+
+                            }
                         }
-                    }
-                    if (renderNote) {
-                        MusicStore.activeNotes.add(renderableNote);
-                    }
-                    //if (Settings.piano) {
-
-                    nextInput();
-//                    invalidate();
-
-
-                    //}
-                    break;
+                        break;
+                }
             }
         }
         return result;
     }
 
+
     private void drawNoteHead(Note note, Canvas canvas) {
         MediaPlayer mediaPlayer = new MediaPlayer();
-
         try {
-            mediaPlayer.setDataSource(getContext(), Uri.parse("android.resource://com.devs.musicalharmonization/raw/" + note.getName().toString() + Integer.toString(note.getOctave())));
+            mediaPlayer.setDataSource(noteSound.getPath());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -303,49 +435,8 @@ public class CompositionView extends View {
         }
 
         accidental = 0;
-
-        //Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.alto_clef);
-        //c.drawBitmap(Bitmap.createScaledBitmap(b, (int) ((4 * (int) DensityMetrics.spaceHeight) / 1.5), 4 * (int) DensityMetrics.spaceHeight, true), 20, altoClef, paint);
-
     }
 
-
-    void nextInput() {
-        new Thread(new Runnable() {
-            public void run() {
-                MusicStore.sheet.add(MusicStore.activeNotes);
-                //   System.gc()
-//                for (Note note: MusicStore.activeNotes) {
-//                    MediaPlayer mediaPlayer = new MediaPlayer();
-//                    try {
-//                        mediaPlayer.setDataSource(getContext(), Uri.parse("android.resource://com.devs.musicalharmonization/raw/" + note.getName().toString() + Integer.toString(note.getOctave())));
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                    Log.i("Media Playing:", "Player created!");
-//                    mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-//                        @Override
-//                        public void onPrepared(MediaPlayer mediaPlayer) {
-//                            mediaPlayer.start();
-//                        }
-//                    });
-//                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-//                        @Override
-//                        public void onCompletion(MediaPlayer mediaPlayer) {
-//                            mediaPlayer.release();
-//                        }
-//                    });
-//                    try {
-//                        mediaPlayer.prepareAsync();
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-                MusicStore.activeNotes = new ArrayList<Note>() ;
-            }
-        }).start();
-    }
 
     class mListener extends GestureDetector.SimpleOnGestureListener {
 
