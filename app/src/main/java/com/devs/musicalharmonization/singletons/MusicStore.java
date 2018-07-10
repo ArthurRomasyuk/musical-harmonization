@@ -12,6 +12,7 @@ public class MusicStore {
     public static ArrayList<ArrayList<Note>> sheet = new ArrayList();
     public static ArrayList<ArrayList<Note>> sheetAfterGarmonization = new ArrayList();
     public static ArrayList<Note> activeNotes = new ArrayList<Note>();
+    public static TreeNode<ArrayList<Note>> tree;
 //    public static ArrayList<Note> notesForBarLine = new ArrayList<Note>();
 //    public static ArrayList<Note> notesBeforeBar = new ArrayList<Note>();
 

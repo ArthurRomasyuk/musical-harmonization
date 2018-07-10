@@ -13,6 +13,15 @@ import java.io.File
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.CountDownLatch
+import android.app.ProgressDialog
+import android.content.Context
+import android.os.Looper
+import android.support.annotation.UiThread
+import android.view.View
+import android.widget.ProgressBar
+import com.devs.musicalharmonization.activity.Composition
+import java.util.concurrent.ConcurrentHashMap
+
 
 /**
  * @author Artur Romasiuk
@@ -141,7 +150,6 @@ class Utils {
         fun prepareMelody(prepareForMusicSheet: Boolean): File {
             val tempoTrack = MidiTrack()
             val noteTrack = MidiTrack()
-
             //TODO: Make the timesignatures dynamic
             val ts = TimeSignature()
             ts.setTimeSignature(4, 4, TimeSignature.DEFAULT_METER, TimeSignature.DEFAULT_DIVISION)
@@ -157,8 +165,7 @@ class Utils {
             var tempTick: Long = 0
             if (prepareForMusicSheet) {
                 val startSignal = CountDownLatch(1)
-                Utils.determineChord(startSignal)
-                startSignal.await()
+                Utils.determineChord()
                 for (chord in MusicStore.sheetAfterGarmonization) {
                     var chordMargin: Long = 0
                     for (note in chord) {
@@ -295,67 +302,98 @@ class Utils {
 //            }
 //        }
 
-        fun determineChord(countDownLatch: CountDownLatch) {
-            Thread(Runnable {
-                var previousNote: Note? = null
-                var previousChord: ArrayList<Note> = ArrayList()
-                var previousPreviousChord: ArrayList<Note> = ArrayList()
-                MusicStore.sheetAfterGarmonization = ArrayList()
-                var possibleSolutionsTree: TreeNode<ArrayList<Note>> = TreeNode(ArrayList())
-                var mapForBranch: HashMap<TreeNode<ArrayList<Note>>, ArrayList<ArrayList<Note>>> = HashMap()
+        fun determineChord() {
+//            Thread(Runnable {
+            var previousNote: Note? = null
+            var previousChord: ArrayList<Note> = ArrayList()
+            var previousPreviousChord: ArrayList<Note> = ArrayList()
+            MusicStore.sheetAfterGarmonization = ArrayList()
+            var possibleSolutionsTree: TreeNode<ArrayList<Note>> = TreeNode(ArrayList())
+            var mapForBranch: ConcurrentHashMap<TreeNode<ArrayList<Note>>, ArrayList<ArrayList<Note>>> = ConcurrentHashMap()
 
-                for (i in MusicStore.sheet.indices) {
-                    for (note in MusicStore.sheet[i]) {
-                        determineChordForNote(note, previousNote)
-                        if (i == 0) {
-                            var allPossibleChords = harmonizeNote(note, previousChord, previousPreviousChord)
-                            for (possibleSolution in allPossibleChords) {
-                                possibleSolutionsTree.addChild(possibleSolution)
-                            }
+            for (i in MusicStore.sheet.indices) {
+                for (note in MusicStore.sheet[i]) {
+                    determineChordForNote(note, previousNote)
+                    if (i == 0) {
+                        var allPossibleChords: ArrayList<ArrayList<Note>>
+                        if ((MusicStore.sheet.size - 1) >= (i + 2)) {
+                            determineChordForNote(MusicStore.sheet[i + 1][0], note)
+                            determineChordForNote(MusicStore.sheet[i + 2][0], MusicStore.sheet[i + 1][0])
+                            allPossibleChords = harmonizeNote(note, previousChord, previousPreviousChord, MusicStore.sheet[i + 1][0], MusicStore.sheet[i + 2][0])
+                        } else if ((MusicStore.sheet.size - 1) >= (i + 1)) {
+                            determineChordForNote(MusicStore.sheet[i + 1][0], note)
+                            allPossibleChords = harmonizeNote(note, previousChord, previousPreviousChord, MusicStore.sheet[i + 1][0])
                         } else {
-                            for (branch in possibleSolutionsTree) {
-                                if (branch.level == i) {
-                                    previousChord = branch.data
-                                    if (branch.level > 2) {
-                                        previousPreviousChord = branch.parent.data
-                                    }
-                                    var allPossibleChordsForBranch = harmonizeNote(note, previousChord, previousPreviousChord)
-                                    mapForBranch.put(branch, allPossibleChordsForBranch)
+                            allPossibleChords = harmonizeNote(note, previousChord, previousPreviousChord)
+                        }
+                        for (possibleSolution in allPossibleChords) {
+                            possibleSolutionsTree.addChild(possibleSolution)
+                        }
+                    } else {
+                        mapForBranch.clear()
+                        for (branch in possibleSolutionsTree) {
+                            if (branch.level == i) {
+                                previousChord = branch.data
+                                var allPossibleChordsForBranch: ArrayList<ArrayList<Note>>
+                                if (branch.level > 2) {
+                                    previousPreviousChord = branch.parent.data
                                 }
+                                if ((MusicStore.sheet.size - 1) >= (i + 2)) {
+                                    determineChordForNote(MusicStore.sheet[i + 1][0], note)
+                                    determineChordForNote(MusicStore.sheet[i + 2][0], MusicStore.sheet[i + 1][0])
+                                    allPossibleChordsForBranch = harmonizeNote(note, previousChord, previousPreviousChord, MusicStore.sheet[i + 1][0], MusicStore.sheet[i + 2][0])
+                                } else if ((MusicStore.sheet.size - 1) >= (i + 1)) {
+                                    determineChordForNote(MusicStore.sheet[i + 1][0], note)
+                                    allPossibleChordsForBranch = harmonizeNote(note, previousChord, previousPreviousChord, MusicStore.sheet[i + 1][0])
+                                } else {
+                                    allPossibleChordsForBranch = harmonizeNote(note, previousChord, previousPreviousChord)
+                                }
+                                mapForBranch.put(branch, allPossibleChordsForBranch)
                             }
-                            for (branch in mapForBranch.keys) {
-                                val searchCriteria = object : Comparable<ArrayList<Note>> {
-                                    override fun compareTo(treeData: ArrayList<Note>): Int {
-                                        if (treeData == null)
-                                            return 1
-                                        val nodeOk = treeData.containsAll(branch.data)
-                                        return if (nodeOk) 0 else 1
-                                    }
-                                }
-                                val found = possibleSolutionsTree.findTreeNode(searchCriteria)
+                        }
 
-                                for (possibleSolution in mapForBranch.get(branch)!!) {
-                                    found.addChild(possibleSolution)
+                        for (branch in mapForBranch.keys) {
+                            val chordsForBranch = mapForBranch.get(branch)
+                            if (chordsForBranch!!.size != 0) {
+                                for (possibleSolution in chordsForBranch) {
+                                    branch.addChild(possibleSolution)
                                 }
                             }
                         }
-                        previousNote = note
 
+//                            for (branch in mapForBranch.keys) {
+//                                val searchCriteria = object : Comparable<ArrayList<Note>> {
+//                                    override fun compareTo(treeData: ArrayList<Note>): Int {
+//                                        if (treeData == null)
+//                                            return 1
+//                                        val nodeOk = treeData.containsAll(branch.data)
+//                                        return if (nodeOk) 0 else 1
+//                                    }
+//                                }
+//                                val found = possibleSolutionsTree.findTreeNode(searchCriteria)
+//
+//                                for (possibleSolution in mapForBranch.get(branch)!!) {
+//                                    found.addChild(possibleSolution)
+//                                }
+//                            }
                     }
-                }
+                    previousNote = note
 
-                var list: ArrayList<ArrayList<Note>> = ArrayList()
-                for (branch in possibleSolutionsTree) {
-                    if (branch.isLeaf())
-                        if (branch.level == MusicStore.sheet.size) {
-                            createMusicStoreSheetFromTree(branch, list)
-                            break
-                        }
                 }
-                Collections.reverse(list);
-                MusicStore.sheetAfterGarmonization.addAll(list)
-                countDownLatch.countDown()
-            }).start()
+            }
+
+            var list: ArrayList<ArrayList<Note>> = ArrayList()
+            for (branch in possibleSolutionsTree) {
+                if (branch.isLeaf())
+                    if (branch.level == MusicStore.sheet.size) {
+                        createMusicStoreSheetFromTree(branch, list)
+                        break
+                    }
+            }
+//            MusicStore.tree = possibleSolutionsTree
+            Collections.reverse(list);
+            MusicStore.sheetAfterGarmonization.addAll(list)
+//            }).start()
         }
 
         private fun createMusicStoreSheetFromTree(treeNode: TreeNode<ArrayList<Note>>, list: ArrayList<ArrayList<Note>>) {
@@ -415,8 +453,8 @@ class Utils {
                 }
         }
 
-        private fun harmonizeNote(note: Note, temporaryChordPitch: ArrayList<Int>, previousChord: ArrayList<Note>,
-                                  previousPreviousChord: ArrayList<Note>, nextNote: Note, nextNextNote: Note): ArrayList<Note> {
+        private fun harmonizeNote(note: Note, previousChord: ArrayList<Note>,
+                                  previousPreviousChord: ArrayList<Note>, nextNote: Note, nextNextNote: Note): ArrayList<ArrayList<Note>> {
             var generatedNotesForHarmony = generateNotesForHarmony(note)
             var generatedNotesForHarmonyForNextChord = generateNotesForHarmony(nextNote)
             var generatedNotesForHarmonyForNextNextChord = generateNotesForHarmony(nextNextNote)
@@ -430,20 +468,20 @@ class Utils {
 
             loop@ for (chordPitch in generatedNotesForHarmony) {
                 temporaryChordPitch.addAll(chordPitch)
-                val createVoicesForChord = createVoicesForChord(note, temporaryChordPitch)
-                var temporaryChord: ArrayList<Note> = ArrayList()
-                temporaryChord.add(note)
-                temporaryChord.addAll(createVoicesForChord)
+                val temporaryChord = createVoicesForChord(note, temporaryChordPitch)
+//                var temporaryChord: ArrayList<Note> = ArrayList()
+//                temporaryChord.add(note)
+//                temporaryChord.addAll(createVoicesForChord)
                 harmony = checkHarmonyRules(temporaryChordPitch, previousChord, previousPreviousChord, note)
                 if (harmony) {
                     var nextChordPitch: ArrayList<Int> = ArrayList()
                     nextChordPitch.add(nextNote.pitch)
                     for (chordPitchForNextChord in generatedNotesForHarmonyForNextChord) {
                         nextChordPitch.addAll(chordPitchForNextChord)
-                        val createVoicesForNextChord = createVoicesForChord(nextNote, nextChordPitch)
-                        var temporaryNextChord: ArrayList<Note> = ArrayList()
-                        temporaryNextChord.add(nextNote)
-                        temporaryNextChord.addAll(createVoicesForNextChord)
+                        val temporaryNextChord = createVoicesForChord(nextNote, nextChordPitch)
+//                        var temporaryNextChord: ArrayList<Note> = ArrayList()
+//                        temporaryNextChord.add(nextNote)
+//                        temporaryNextChord.addAll(createVoicesForNextChord)
                         harmonyForNextChord = checkHarmonyRules(nextChordPitch, temporaryChord, previousChord, nextNote)
                         if (harmonyForNextChord) {
                             var nextNextChordPitch: ArrayList<Int> = ArrayList()
@@ -484,13 +522,17 @@ class Utils {
                     temporaryChordPitch.removeAt(1)
                 }
             }
-            var elements = ArrayList<Note>()
-            var indexWithMinDiff: Int = determineIndexWithMinDifferenceForSet(possibleSolutions)
+//            var possibleChord = ArrayList<Note>()
+            var allPossibleChords = ArrayList<ArrayList<Note>>()
+//            var indexWithMinDiff: Int = determineIndexWithMinDifference(possibleSolutions)
             if (possibleSolutions.size > 0) {
-                elements = createVoicesForChord(note, possibleSolutions.elementAt(indexWithMinDiff))
+                for (possibleSolution in possibleSolutions) {
+//                    possibleChord = createVoicesForChord(note, possibleSolution)
+                    allPossibleChords.add(createVoicesForChord(note, possibleSolution))
+                }
             }
-
-            return elements
+            //            return elements
+            return allPossibleChords
         }
 
         private fun determineIndexWithMinDifference(possibleSolutions: ArrayList<ArrayList<Int>>): Int {
@@ -533,21 +575,21 @@ class Utils {
             return indexWithMinDiff
         }
 
-        private fun harmonizeNote(note: Note, temporaryChordPitch: ArrayList<Int>, previousChord: ArrayList<Note>,
-                                  previousPreviousChord: ArrayList<Note>, nextNote: Note): ArrayList<Note> {
+        private fun harmonizeNote(note: Note, previousChord: ArrayList<Note>,
+                                  previousPreviousChord: ArrayList<Note>, nextNote: Note): ArrayList<ArrayList<Note>> {
             var generatedNotesForHarmony = generateNotesForHarmony(note)
             var generatedNotesForHarmonyForNextChord = generateNotesForHarmony(nextNote)
             var harmony: Boolean = false
             var harmonyForNextChord: Boolean = false
             var temporaryChordPitch: ArrayList<Int> = ArrayList()
             temporaryChordPitch.add(note.pitch)
-            var possibleSolutions: ArrayList<ArrayList<Int>> = ArrayList()
+            var possibleSolutions: HashSet<ArrayList<Int>> = HashSet()
             loop@ for (chordPitch in generatedNotesForHarmony) {
                 temporaryChordPitch.addAll(chordPitch)
-                val createVoicesForChord = createVoicesForChord(note, temporaryChordPitch)
-                var temporaryChord: ArrayList<Note> = ArrayList()
-                temporaryChord.add(note)
-                temporaryChord.addAll(createVoicesForChord)
+                val temporaryChord = createVoicesForChord(note, temporaryChordPitch)
+//                var temporaryChord: ArrayList<Note> = ArrayList()
+//                temporaryChord.add(note)
+//                temporaryChord.addAll(createVoicesForChord)
                 harmony = checkHarmonyRules(temporaryChordPitch, previousChord, previousPreviousChord, note)
                 if (harmony) {
                     var nextChordPitch: ArrayList<Int> = ArrayList()
@@ -580,19 +622,24 @@ class Utils {
                 }
             }
 
-            var elements = ArrayList<Note>()
-            var indexWithMinDiff: Int = determineIndexWithMinDifference(possibleSolutions)
+//            var possibleChord = ArrayList<Note>()
+            var allPossibleChords = ArrayList<ArrayList<Note>>()
+//            var indexWithMinDiff: Int = determineIndexWithMinDifference(possibleSolutions)
             if (possibleSolutions.size > 0) {
-                elements = createVoicesForChord(note, possibleSolutions[indexWithMinDiff])
+                for (possibleSolution in possibleSolutions) {
+//                    possibleChord = createVoicesForChord(note, possibleSolution)
+                    allPossibleChords.add(createVoicesForChord(note, possibleSolution))
+                }
             }
-            return elements
+            //            return elements
+            return allPossibleChords
         }
 
         private fun harmonizeNote(note: Note, previousChord: ArrayList<Note>, previousPreviousChord: ArrayList<Note>): ArrayList<ArrayList<Note>> {
             var generatedNotesForHarmony = generateNotesForHarmony(note)
             var temporaryChordPitch: ArrayList<Int> = ArrayList()
             temporaryChordPitch.add(note.pitch)
-            var possibleSolutions: ArrayList<ArrayList<Int>> = ArrayList()
+            var possibleSolutions: HashSet<ArrayList<Int>> = HashSet()
             for (chordPitch in generatedNotesForHarmony) {
                 temporaryChordPitch.addAll(chordPitch)
                 if (checkHarmonyRules(temporaryChordPitch, previousChord, previousPreviousChord, note)) {
@@ -620,6 +667,7 @@ class Utils {
                     allPossibleChords.add(createVoicesForChord(note, possibleSolution))
                 }
             }
+            //            return elements
             return allPossibleChords
         }
 
@@ -920,7 +968,6 @@ class Utils {
                     }
                 }
             }
-//            Log.i("generateNotesForHarmony", notesWithDistanceInOneOctave.toString())
 
             for (x in 0..2) {
                 var first: Int

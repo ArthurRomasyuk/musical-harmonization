@@ -5,6 +5,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -12,8 +13,10 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
+import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
 import android.support.v4.app.ActivityCompat
@@ -30,8 +33,10 @@ import android.text.InputType
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.animation.OvershootInterpolator
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import com.devs.musicalharmonization.*
@@ -51,38 +56,7 @@ import java.util.*
 class Composition : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     internal var REGULAR_COLOR: Int = Color.RED
     internal val SELECTED_COLOR: Int = Color.rgb(229, 115, 115)
-
-
-    private fun nameToNum(note: Note): Int {
-        var noteNum = -1
-        val pitchInOctava = 12
-        if (note.name == Note.NoteName.c) {
-            noteNum = pitchInOctava * note.octave
-        } else if (note.name == Note.NoteName.cs) {
-            noteNum = pitchInOctava * note.octave + 1
-        } else if (note.name == Note.NoteName.d) {
-            noteNum = pitchInOctava * note.octave + 2
-        } else if (note.name == Note.NoteName.ds) {
-            noteNum = pitchInOctava * note.octave + 3
-        } else if (note.name == Note.NoteName.e) {
-            noteNum = pitchInOctava * note.octave + 4
-        } else if (note.name == Note.NoteName.f) {
-            noteNum = pitchInOctava * note.octave + 5
-        } else if (note.name == Note.NoteName.fs) {
-            noteNum = pitchInOctava * note.octave + 6
-        } else if (note.name == Note.NoteName.g) {
-            noteNum = pitchInOctava * note.octave + 7
-        } else if (note.name == Note.NoteName.gs) {
-            noteNum = pitchInOctava * note.octave + 8
-        } else if (note.name == Note.NoteName.a) {
-            noteNum = pitchInOctava * note.octave + 9
-        } else if (note.name == Note.NoteName.`as`) {
-            noteNum = pitchInOctava * note.octave + 10
-        } else if (note.name == Note.NoteName.b) {
-            noteNum = pitchInOctava * note.octave + 11
-        }
-        return noteNum
-    }
+//    lateinit var compositionView:CompositionView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,7 +73,8 @@ class Composition : AppCompatActivity(), NavigationView.OnNavigationItemSelected
                     arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                     REQUEST_WRITE_STORAGE)
         }
-
+        progressBar = findViewById<ProgressBar>(R.id.harmonyProgressBar)
+        compositionView = findViewById<CompositionView>(R.id.composition_canvas)
         Thread(Runnable {
             val quarterNoteHead = ContextCompat.getDrawable(this, R.drawable.quarter_note_head) as Drawable
             NoteBitmap.qnh = NoteBitmap.getBitmap(quarterNoteHead)
@@ -121,29 +96,34 @@ class Composition : AppCompatActivity(), NavigationView.OnNavigationItemSelected
         // System.gc()
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener {
-//            val o = Utils.prepareMelody(true)
-
-                val o = Utils.prepareMelody(true)
-
-                val mp = MediaPlayer()
-                try {
-                    mp.setDataSource(o.path)
-                } catch (e: IOException) {
-                    System.err.println("Couldn't init media player")
-                }
-
-                mp.setOnPreparedListener { mp ->
-                    mp.start()
-                    Log.i("MP", "Playing MIDI")
-                }
-                mp.setOnCompletionListener { mp -> mp.release() }
-
-                try {
-                    mp.prepare()
-                } catch (e: Exception) {
-                    Log.e("MP", "Error with media player prepare")
-                }
-                findViewById<CompositionView>(R.id.composition_canvas).invalidate()
+            progressBar.visibility = View.VISIBLE
+            prepareMelodyTask().execute()
+//            progressBar.visibility = View.VISIBLE
+//            Thread (
+//                Runnable {
+//                    //            val o = Utils.prepareMelody(true)
+//                    val o = Utils.prepareMelody(true)
+//                    val mp = MediaPlayer()
+//                    try {
+//                        mp.setDataSource(o.path)
+//                    } catch (e: IOException) {
+//                        System.err.println("Couldn't init media player")
+//                    }
+//
+//                    mp.setOnPreparedListener { mp ->
+//                        mp.start()
+//                        Log.i("MP", "Playing MIDI")
+//                    }
+//                    mp.setOnCompletionListener { mp -> mp.release() }
+//
+//                    try {
+//                        mp.prepare()
+//                    } catch (e: Exception) {
+//                        Log.e("MP", "Error with media player prepare")
+//                    }
+//                    findViewById<CompositionView>(R.id.composition_canvas).postInvalidate()
+//                }
+//            ).start()
         }
 
 
@@ -258,71 +238,6 @@ class Composition : AppCompatActivity(), NavigationView.OnNavigationItemSelected
 
     }
 
-    fun prepareMelody(prepareForMusicSheet: Boolean): File {
-        val tempoTrack = MidiTrack()
-        val noteTrack = MidiTrack()
-
-        //TODO: Make the timesignatures dynamic
-        val ts = TimeSignature()
-        ts.setTimeSignature(4, 4, TimeSignature.DEFAULT_METER, TimeSignature.DEFAULT_DIVISION)
-
-        //TODO: Make BPM Dynamic
-        val tempo = Tempo()
-        tempo.bpm = 60f
-
-        tempoTrack.insertEvent(ts)
-        tempoTrack.insertEvent(tempo)
-        var lastR = 0.0
-        var tick: Long = 0
-        var tempTick: Long = 0
-        if (prepareForMusicSheet) {
-            for (chord in MusicStore.sheet) {
-                var chordMargin: Long = 0
-                for (note in chord) {
-                    tempTick = (tick + 480 * lastR).toLong()
-
-                    noteTrack.insertNote(0, nameToNum(note), 100, tempTick + chordMargin, 120 * note.rhythm.toLong())
-                    print("Kill me")
-                    chordMargin += 1
-                    lastR = note.rhythm
-                }
-                //TODO: This won't work for polyrhythmic chords lmao
-                tick = tempTick
-            }
-        } else {
-            var chordMargin: Long = 0
-            for (note in MusicStore.activeNotes) {
-                tempTick = (tick + 480 * lastR).toLong()
-
-                noteTrack.insertNote(0, nameToNum(note), 100, tempTick + chordMargin, 120 * note.rhythm.toLong())
-                print("Kill me")
-                chordMargin += 1
-                lastR = note.rhythm
-            }
-            //TODO: This won't work for polyrhythmic chords lmao
-            tick = tempTick
-        }
-
-        val tracks = ArrayList<MidiTrack>()
-        tracks.add(tempoTrack)
-        noteTrack.insertEvent(ProgramChange(0, 0, 1))
-        tracks.add(noteTrack)
-
-        val midi = MidiFile(MidiFile.DEFAULT_RESOLUTION, tracks)
-        val sdCard = Environment.getExternalStorageDirectory()
-        val o = File(sdCard, "music.mid")
-        try {
-            midi.writeToFile(o)
-
-            Toast.makeText(this, "File WRITTEN!, find it here: " + "/sdcard/Music/music.mid", Toast.LENGTH_SHORT).show()
-        } catch (e: IOException) {
-            System.err.println(e)
-            Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show()
-
-        }
-        return o
-    }
-
     override fun onBackPressed() {
 //        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
 //        if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -359,7 +274,7 @@ class Composition : AppCompatActivity(), NavigationView.OnNavigationItemSelected
             } else {
                 MusicStore.activeNotes.clear()
             }
-            if(Bar.activeBarNotes.size!=0){
+            if (Bar.activeBarNotes.size != 0) {
                 Bar.activeBarNotes.removeAt(Bar.activeBarNotes.size - 1)
             }
             Utils.Companion.wasUndoPressed = true
@@ -438,41 +353,39 @@ class Composition : AppCompatActivity(), NavigationView.OnNavigationItemSelected
 
     }
 
+    private class prepareMelodyTask() : AsyncTask<Void, Void, Void>() {
+        override fun doInBackground(vararg params: Void?): Void? {
+            val o = Utils.prepareMelody(true)
+            val mp = MediaPlayer()
+            try {
+                mp.setDataSource(o.path)
+            } catch (e: IOException) {
+                System.err.println("Couldn't init media player")
+            }
 
+            mp.setOnPreparedListener { mp ->
+                mp.start()
+                Log.i("MP", "Playing MIDI")
+            }
+            mp.setOnCompletionListener { mp -> mp.release() }
 
-//    fun nextInput() {
-//        object : Thread() {
-//            override fun run() {
-//                MusicStore.sheet.add(MusicStore.activeNotes)
-//                //   System.gc()
-//                for (note in MusicStore.activeNotes) {
-//                    val mediaPlayer = MediaPlayer()
-//                    try {
-//                        mediaPlayer.setDataSource(applicationContext, Uri.parse("android.resource://com.devs.musicalharmonization/raw/" + note.name!!.toString() + Integer.toString(note.octave)))
-//                    } catch (e: Exception) {
-//
-//                    }
-//
-//                    Log.i("Media Playing:", "Player created!")
-//                    mediaPlayer.setOnPreparedListener { player -> player.start() }
-//                    mediaPlayer.setOnCompletionListener { mp -> mp.release() }
-//                    try {
-//                        mediaPlayer.prepareAsync()
-//                    } catch (e: Exception) {
-//
-//                    }
-//
-//
-//                }
-//
-//                MusicStore.activeNotes = ArrayList<Note>()
-//            }
-//        }.start()
-//    }
+            try {
+                mp.prepare()
+            } catch (e: Exception) {
+                Log.e("MP", "Error with media player prepare")
+            }
+            return null
+        }
 
+        override fun onPostExecute(result: Void?) {
+            compositionView.postInvalidate()
+            progressBar.visibility = View.INVISIBLE
+        }
+    }
 
     companion object {
-
+        lateinit var compositionView: CompositionView
+        lateinit var progressBar: ProgressBar
         private val REQUEST_WRITE_STORAGE = 112
     }
 
